@@ -1,65 +1,86 @@
 /* ════════════════════════════════════════════════════════════════════
-   WEDDING INVITATION · script.js (Mohamed & Batol)
-   فيديو بدون صوت + موسيقى خلفية تبدأ مع الفيديو وتستمر بعد انتهائه
+   WEDDING INVITATION · script.js
    ════════════════════════════════════════════════════════════════════ */
 
 "use strict";
 
-/* ========================= CONFIGURATION ========================= */
+/* ─── CONFIGURATION ──────────────────────────────────────────────────
+     🔹 UPDATE THESE VALUES WITH YOUR DATA 🔹
+   ────────────────────────────────────────────────────────────────── */
 const CONFIG = {
-  // أسماء العروسين
+  // --- Wedding Info ---
   groomName: "Azzam",
   brideName: "Menna",
   groomNameAr: "عزام",
   brideNameAr: "منة",
-
-  // تاريخ ووقت ومكان الزفاف
   weddingDate: "June 28, 2026",
   weddingDateAr: "٢٨ يونيو ٢٠٢٦",
-  weddingTime: "7 pm",
+  weddingTime: "9:00 PM",
   weddingLocation: "Sira Hall , Talkha . Mansoura",
   weddingLocationAr: "قاعة سِيرا، طلخا، المنصورة",
   weddingMapLink:
-    "https://www.google.com/maps/place/%D9%82%D8%A7%D8%B9%D8%A9+%D8%B3%D9%8A%D8%B1%D8%A7+%D8%B7%D9%84%D8%AE%D8%A7%E2%80%AD/@31.056665,31.3956595,17z/data=!3m1!4b1!4m6!3m5!1s0x14f79d00388b6d97:0xfa5d841ea753f36b!8m2!3d31.056665!4d31.3956595!16s%2Fg%2F11vz20b4v6!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDQyMi4wIKXMDSoASAFQAw%3D%3D",
+    "https://www.google.com/maps/place/%D9%82%D8%A7%D8%B9%D8%A9+%D8%B3%D9%8A%D8%B1%D8%A7+%D8%B7%D9%84%D8%AE%D8%A7%E2%80%AD/@31.056665,31.3956595,17z/data=!3m1!4b1!4m6!3m5!1s0x14f79d00388b6d97:0xfa5d841ea753f36b!8m2!3d31.056665!4d31.3956595!16s%2Fg%2F11vz20b4v6!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDYxNi4wIKXMDSoASAFQAw%3D%3D",
 
-  // مسارات الملفات
-  crestImage:
-    "assets/images/Gemini_Generated_Image_aai6peaai6peaai6-removebg-preview.webp",
-  doorStaticBg: "assets/images/demo3.webp",
-  doorGif: "assets/images/image1.mp4", // فيديو بدون صوت
-  detailsBg: "assets/images/image2.webp",
-  musicUrl: "assets/music/music1.mp3",
+  // --- Henna Night Info ---
+  hennaDate: "June 22, 2026",
+  hennaDateAr: "٢٢ يونيو ٢٠٢٦",
+  hennaTime: "9:00 PM",
+  hennaLocation: "Next to the House",
+  hennaLocationAr: "بجانب المنزل",
+  hennaMapLink:
+    "https://www.google.com/maps/place/31%C2%B004'28.8%22N+31%C2%B029'47.0%22E/@31.0746681,31.4970447,19z/data=!3m1!4b1!4m4!3m3!8m2!3d31.074667!4d31.496401!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDYxNi4wIKXMDSoASAFQAw%3D%3D",
 
-  // أرقام واتساب
-  groomWhatsappNumber: "201064635613",
-  brideWhatsappNumber: "201550278277",
+  // --- WhatsApp Numbers (for RSVP) ---
+  groomWhatsapp: "201064635613",
+  brideWhatsapp: "201550278277",
 
-  assetsToPreload: [],
+  // --- Social Media Links ---
+  social: {
+    whatsapp: "https://wa.me/201505646406",
+    phone: "tel:+201505646406",
+    tiktok: "https://www.tiktok.com/@loventa68",
+    instagram: "https://www.instagram.com/love__nta/",
+    facebook:
+      "https://www.facebook.com/profile.php?id=61565289157594&mibextid=wwXIfr&rdid=LvOEQfQIXRkCukV0&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1Ck7EUrzmW%2F%3Fmibextid%3DwwXIfr#",
+  },
+
+  // --- Contact Info (displayed in footer) ---
+  contactPhone: "+201505646406",
+  contactEmail: "midoreda66029@gmail.com",
+
+  // --- Asset Paths ---
+  assets: {
+    crest: "assets/images/logo (1).webp",
+    doorStatic: "assets/images/photo_2026-04-30_07-13-50.jpg",
+    doorGif: "assets/images/IMG_4681.MP4",
+    detailsBg: "assets/images/background.jpg",
+    doorMusic: "assets/music/door.mp3",
+    weddingMusic: "assets/music/music.mp3",
+  },
+
+  // --- Music Volume (0 to 1) ---
+  musicVolume: 0.65,
 };
 
-CONFIG.assetsToPreload = [
-  CONFIG.crestImage,
-  CONFIG.doorStaticBg,
-  CONFIG.doorGif,
-  CONFIG.detailsBg,
-  CONFIG.musicUrl,
-].filter(Boolean);
-
-/* ================================================================= */
-
+/* ─── STATE ──────────────────────────────────────────────────────── */
 let currentLang = "en";
 let loadProgress = 0;
 let doorPlayed = false;
 let currentWhatsAppMessage = "";
-let bgMusic = null;
+let doorAudio = null;
+let weddingAudio = null;
+let currentAudio = null;
+let countdownInterval = null;
+let isMusicPlaying = false;
+let audioContextUnlocked = false;
+let isWeddingPageActive = false;
 
-// DOM elements
+/* ─── DOM REFS ───────────────────────────────────────────────────── */
 const pageLoading = document.getElementById("page-loading");
 const pageDoor = document.getElementById("page-door");
 const pageDetails = document.getElementById("page-details");
 const loadingBar = document.getElementById("loading-bar");
 const doorGif = document.getElementById("door-gif");
-const doorOverlay = document.getElementById("door-overlay");
 const doorGlowRing = document.getElementById("door-glow-ring");
 const knockBtn = document.getElementById("knock-btn");
 const langBtnDoor = document.getElementById("lang-btn-door");
@@ -68,81 +89,306 @@ const rsvpForm = document.getElementById("rsvp-form");
 const rsvpSuccess = document.getElementById("rsvp-success");
 const particles = document.getElementById("particles");
 const petalsWrap = document.getElementById("petals");
+const musicControlBtn = document.getElementById("music-control-btn");
 
-// تهيئة الصوت
+const daysEl = document.getElementById("days");
+const hoursEl = document.getElementById("hours");
+const minutesEl = document.getElementById("minutes");
+const secondsEl = document.getElementById("seconds");
+const countdownMsgEn = document.getElementById("countdown-message");
+const countdownMsgAr = document.getElementById("countdown-message-ar");
+
+/* ─── AUDIO UNLOCK ───────────────────────────────────────────────── */
+function unlockAudioContext() {
+  if (audioContextUnlocked) return;
+
+  const unlock = () => {
+    if (audioContextUnlocked) return;
+
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (AudioContext) {
+      const context = new AudioContext();
+      const gain = context.createGain();
+      gain.gain.value = 0;
+      gain.connect(context.destination);
+      const oscillator = context.createOscillator();
+      oscillator.connect(gain);
+      oscillator.start(0);
+      oscillator.stop(0.001);
+      context.close();
+    }
+
+    audioContextUnlocked = true;
+  };
+
+  document.addEventListener("click", unlock, { once: true });
+  document.addEventListener("touchstart", unlock, { once: true });
+}
+
+/* ─── COUNTDOWN ──────────────────────────────────────────────────── */
+function initCountdown() {
+  if (!daysEl) return;
+
+  const dateTimeString = `${CONFIG.weddingDate} ${CONFIG.weddingTime}`;
+  let targetDate = new Date(dateTimeString);
+  if (isNaN(targetDate.getTime())) {
+    targetDate = new Date(2026, 4, 28, 19, 0, 0);
+  }
+
+  function updateTimer() {
+    const now = new Date();
+    const diff = targetDate - now;
+
+    if (diff <= 0) {
+      if (countdownInterval) clearInterval(countdownInterval);
+      daysEl.textContent = "00";
+      hoursEl.textContent = "00";
+      minutesEl.textContent = "00";
+      secondsEl.textContent = "00";
+      if (countdownMsgEn)
+        countdownMsgEn.textContent = "✨ The celebration has begun! ✨";
+      if (countdownMsgAr) countdownMsgAr.textContent = "✨ بدأ الاحتفال! ✨";
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    daysEl.textContent = days.toString().padStart(2, "0");
+    hoursEl.textContent = hours.toString().padStart(2, "0");
+    minutesEl.textContent = minutes.toString().padStart(2, "0");
+    secondsEl.textContent = seconds.toString().padStart(2, "0");
+
+    if (countdownMsgEn && days <= 7) {
+      if (days === 0)
+        countdownMsgEn.textContent = "🎉 Tomorrow is the big day! 🎉";
+      else if (days <= 3)
+        countdownMsgEn.textContent = "💛 Getting so close! 💛";
+      else countdownMsgEn.textContent = "✨ Counting every moment ✨";
+    }
+    if (countdownMsgAr && days <= 7) {
+      if (days === 0)
+        countdownMsgAr.textContent = "🎉 غداً هو اليوم الكبير! 🎉";
+      else if (days <= 3)
+        countdownMsgAr.textContent = "💛 يقترب موعد الفرح! 💛";
+      else countdownMsgAr.textContent = "✨ نعد كل لحظة ✨";
+    }
+  }
+
+  updateTimer();
+  countdownInterval = setInterval(updateTimer, 1000);
+}
+
+/* ─── AUDIO INIT ─────────────────────────────────────────────────── */
 function initAudio() {
-  bgMusic = document.getElementById("bg-music");
-  if (CONFIG.musicUrl && bgMusic) {
-    bgMusic.src = CONFIG.musicUrl;
-    bgMusic.load();
-    bgMusic.loop = true;
-    bgMusic.volume = 0;
+  // Create door audio
+  if (CONFIG.assets.doorMusic) {
+    doorAudio = new Audio(CONFIG.assets.doorMusic);
+    doorAudio.loop = false;
+    doorAudio.volume = CONFIG.musicVolume;
+    doorAudio.preload = "auto";
+  }
+
+  // Create wedding audio
+  if (CONFIG.assets.weddingMusic) {
+    weddingAudio = new Audio(CONFIG.assets.weddingMusic);
+    weddingAudio.loop = true;
+    weddingAudio.volume = CONFIG.musicVolume;
+    weddingAudio.preload = "auto";
+  }
+
+  unlockAudioContext();
+}
+
+function fadeInAudio(audio, vol = CONFIG.musicVolume, ms = 1500) {
+  if (!audio) return;
+
+  audio.volume = 0;
+
+  const playPromise = audio.play();
+  if (playPromise !== undefined) {
+    playPromise
+      .then(() => {
+        isMusicPlaying = true;
+        currentAudio = audio;
+        const step = vol / (ms / 50);
+        const id = setInterval(() => {
+          if (audio.volume + step < vol) {
+            audio.volume += step;
+          } else {
+            audio.volume = vol;
+            clearInterval(id);
+          }
+        }, 50);
+        updateMusicButtonUI();
+      })
+      .catch((e) => {
+        console.log("Audio play error:", e);
+        isMusicPlaying = false;
+        updateMusicButtonUI();
+      });
   }
 }
 
-// تلاشي الصوت دخولاً
-function fadeInMusic(el, vol = 0.65, ms = 1500) {
-  if (!el) return;
-  el.volume = 0;
-  el.play().catch((e) => console.log("Audio play error:", e));
-  const step = vol / (ms / 50);
+function fadeOutAudio(audio, ms = 1000) {
+  if (!audio) return;
+
+  const startVol = audio.volume;
+  const step = startVol / (ms / 50);
   const id = setInterval(() => {
-    if (el.volume + step < vol) el.volume += step;
-    else {
-      el.volume = vol;
+    if (audio.volume - step > 0) {
+      audio.volume -= step;
+    } else {
+      audio.volume = 0;
+      audio.pause();
+      audio.currentTime = 0;
       clearInterval(id);
     }
   }, 50);
 }
 
-// ================ دالة تشغيل الباب (المعدلة) ================
+function stopAllAudio() {
+  if (doorAudio) {
+    doorAudio.pause();
+    doorAudio.currentTime = 0;
+    doorAudio.volume = 0;
+  }
+  if (weddingAudio) {
+    weddingAudio.pause();
+    weddingAudio.currentTime = 0;
+    weddingAudio.volume = 0;
+  }
+  isMusicPlaying = false;
+  currentAudio = null;
+  updateMusicButtonUI();
+}
+
+/* ─── MUSIC CONTROL ─────────────────────────────────────────────── */
+function updateMusicButtonUI() {
+  if (!musicControlBtn) return;
+
+  const musicIcon = musicControlBtn.querySelector(".music-icon");
+  if (musicIcon) {
+    musicIcon.textContent = isMusicPlaying ? "🔊" : "🔇";
+  }
+}
+
+function toggleMusic(e) {
+  e.stopPropagation();
+
+  if (!doorAudio && !weddingAudio) return;
+
+  if (isMusicPlaying && currentAudio) {
+    // Pause current audio
+    currentAudio.pause();
+    isMusicPlaying = false;
+    updateMusicButtonUI();
+  } else {
+    // Resume current audio or start wedding music if on details page
+    if (isWeddingPageActive && weddingAudio) {
+      const playPromise = weddingAudio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            isMusicPlaying = true;
+            currentAudio = weddingAudio;
+            updateMusicButtonUI();
+          })
+          .catch((error) => {
+            console.log("Playback prevented:", error);
+            isMusicPlaying = false;
+            updateMusicButtonUI();
+            if (!audioContextUnlocked) {
+              unlockAudioContext();
+            }
+          });
+      }
+    } else if (currentAudio) {
+      const playPromise = currentAudio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            isMusicPlaying = true;
+            updateMusicButtonUI();
+          })
+          .catch((error) => {
+            console.log("Playback prevented:", error);
+            isMusicPlaying = false;
+            updateMusicButtonUI();
+          });
+      }
+    }
+  }
+}
+
+function initMusicControl() {
+  if (!musicControlBtn) return;
+
+  // Ensure only icon is shown (no text)
+  const icon = musicControlBtn.querySelector(".music-icon");
+  // Remove any existing text elements
+  musicControlBtn.querySelectorAll(".music-text").forEach((el) => el.remove());
+
+  musicControlBtn.addEventListener("click", toggleMusic);
+  updateMusicButtonUI();
+}
+
+/* ─── DOOR LOGIC ─────────────────────────────────────────────────── */
 function playDoor() {
   if (doorPlayed) return;
   doorPlayed = true;
 
-  // 1. تشغيل الفيديو (بدون صوت – muted)
-  doorGif.src = CONFIG.doorGif;
+  // Play door video
+  doorGif.src = CONFIG.assets.doorGif;
   doorGif.load();
   doorGif.currentTime = 0;
-  doorGif.muted = true; // الفيديو صامت
-  doorGif.play().catch((e) => console.warn("Video play error:", e));
+  doorGif.muted = true;
+  doorGif.play().catch((e) => console.warn("Video error:", e));
 
-  // 2. تشغيل الموسيقى الخلفية (تبدأ من البداية وتتلاشى)
-  if (bgMusic && CONFIG.musicUrl) {
-    bgMusic.currentTime = 0;
-    fadeInMusic(bgMusic, 0.65, 1500);
+  // Play door music
+  if (doorAudio) {
+    stopAllAudio();
+    fadeInAudio(doorAudio, CONFIG.musicVolume, 1000);
   }
 
-  // 3. إظهار تأثيرات الباب
   document.querySelector(".door-bg-wrap").classList.add("revealed");
-  doorOverlay.style.opacity = "0";
   doorGlowRing.classList.add("active");
-
-  // 4. إخفاء زر Knock
   knockBtn.style.opacity = "0";
   knockBtn.style.pointerEvents = "none";
-  knockBtn.style.transform = "scale(0.8)";
 
-  // 5. الانتقال إلى صفحة التفاصيل عند انتهاء الفيديو
   let transitionDone = false;
   const goToDetails = () => {
     if (transitionDone) return;
     transitionDone = true;
-    // لا نلمس الموسيقى – تبقى تعمل
+
+    // Fade out door music
+    if (doorAudio) {
+      fadeOutAudio(doorAudio, 800);
+    }
+
     transitionToPage(pageDoor, pageDetails, () => {
+      isWeddingPageActive = true;
       spawnPetals();
       animateDetailCards();
+      initCountdown();
+
+      // Start wedding music after a short delay
+      setTimeout(() => {
+        if (weddingAudio) {
+          fadeInAudio(weddingAudio, CONFIG.musicVolume, 1200);
+        }
+      }, 500);
     });
   };
 
   doorGif.addEventListener("ended", goToDetails, { once: true });
-  // وقت احتياطي في حال عدم تشغيل حدث ended
   setTimeout(goToDetails, 15000);
 }
 
-// حقن المحتوى الديناميكي من CONFIG
+/* ─── CONTENT INJECTION ──────────────────────────────────────────── */
 function injectContent() {
-  // الأسماء
   document
     .querySelectorAll(".groom-name-en")
     .forEach((el) => (el.textContent = CONFIG.groomName));
@@ -155,8 +401,6 @@ function injectContent() {
   document
     .querySelectorAll(".bride-name-ar")
     .forEach((el) => (el.textContent = CONFIG.brideNameAr));
-
-  // التاريخ والوقت والمكان
   document
     .querySelectorAll(".wedding-date-en")
     .forEach((el) => (el.textContent = CONFIG.weddingDate));
@@ -172,30 +416,77 @@ function injectContent() {
   document
     .querySelectorAll(".wedding-location-ar")
     .forEach((el) => (el.textContent = CONFIG.weddingLocationAr));
-  const weddingMapBtn = document.querySelectorAll(".wedding-map-btn");
-  weddingMapBtn.forEach((btn) => (btn.href = CONFIG.weddingMapLink));
+  document
+    .querySelectorAll(".wedding-map-btn")
+    .forEach((btn) => (btn.href = CONFIG.weddingMapLink));
 
-  // السنة في التذييل
   const year = CONFIG.weddingDate.match(/\d{4}/)?.[0] || "2026";
   document
-    .querySelectorAll(".wedding-year")
-    .forEach((el) => (el.textContent = year));
-  document
-    .querySelectorAll(".wedding-year-ar")
+    .querySelectorAll(".wedding-year, .wedding-year-ar")
     .forEach((el) => (el.textContent = year));
 
-  // الخلفيات والصور
-  if (document.querySelector(".door-static-bg"))
+  if (document.querySelector(".door-static-bg")) {
     document.querySelector(".door-static-bg").style.backgroundImage =
-      `url('${CONFIG.doorStaticBg}')`;
-  if (document.querySelector(".details-bg"))
+      `url('${CONFIG.assets.doorStatic}')`;
+  }
+  if (document.querySelector(".details-bg")) {
     document.querySelector(".details-bg").style.backgroundImage =
-      `url('${CONFIG.detailsBg}')`;
-  const crestImages = document.querySelectorAll(".crest-img, #hero-crest-img");
-  crestImages.forEach((img) => (img.src = CONFIG.crestImage));
+      `url('${CONFIG.assets.detailsBg}')`;
+  }
+  document
+    .querySelectorAll(".crest-img, #hero-crest-img")
+    .forEach((img) => (img.src = CONFIG.assets.crest));
+
+  // Social Media Links
+  const socialIds = {
+    "social-whatsapp": CONFIG.social.whatsapp,
+    "social-phone": CONFIG.social.phone,
+    "social-tiktok": CONFIG.social.tiktok,
+    "social-instagram": CONFIG.social.instagram,
+    "social-facebook": CONFIG.social.facebook,
+  };
+  Object.keys(socialIds).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.href = socialIds[id];
+  });
+
+  // Contact Info
+  const phoneDisplay = document.getElementById("contact-phone-display");
+  if (phoneDisplay) {
+    const val = phoneDisplay.querySelector(".contact-value");
+    if (val) val.textContent = CONFIG.contactPhone;
+  }
+  const emailDisplay = document.getElementById("contact-email-display");
+  if (emailDisplay) {
+    const val = emailDisplay.querySelector(".contact-value");
+    if (val) val.textContent = CONFIG.contactEmail;
+  }
+
+  // Henna Night Data
+  const hennaDateEn = document.getElementById("henna-date-en");
+  const hennaDateAr = document.getElementById("henna-date-ar");
+  const hennaTime = document.getElementById("henna-time");
+  const hennaLocationEn = document.getElementById("henna-location-en");
+  const hennaLocationAr = document.getElementById("henna-location-ar");
+  const hennaMapBtns = document.querySelectorAll(".henna-map-btn");
+
+  if (hennaDateEn)
+    hennaDateEn.textContent = CONFIG.hennaDate || "September 24, 2026";
+  if (hennaDateAr)
+    hennaDateAr.textContent = CONFIG.hennaDateAr || "٢٤ سبتمبر ٢٠٢٦";
+  if (hennaTime) hennaTime.textContent = CONFIG.hennaTime || "8:00 PM";
+  if (hennaLocationEn)
+    hennaLocationEn.textContent =
+      CONFIG.hennaLocation || "Villa laguna el marrioteya";
+  if (hennaLocationAr)
+    hennaLocationAr.textContent =
+      CONFIG.hennaLocationAr || "فيلا لاجوانا المريوطية";
+  hennaMapBtns.forEach(
+    (btn) => (btn.href = CONFIG.hennaMapLink || CONFIG.weddingMapLink),
+  );
 }
 
-// الجسيمات والبتلات
+/* ─── PARTICLES & PETALS ─────────────────────────────────────────── */
 function spawnParticles() {
   for (let i = 0; i < 22; i++) {
     const p = document.createElement("div");
@@ -218,7 +509,14 @@ function spawnPetals() {
   }
 }
 
-// شريط التحميل
+function animateDetailCards() {
+  pageDetails.querySelectorAll(".detail-card").forEach((c, i) => {
+    c.style.animation = "cardEntrance 0.8s ease both";
+    c.style.animationDelay = i * 0.15 + "s";
+  });
+}
+
+/* ─── LOADING BAR ────────────────────────────────────────────────── */
 function easeInOut(t) {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 }
@@ -227,6 +525,7 @@ function setBar(target) {
   const from = loadProgress;
   const start = performance.now();
   const duration = 400;
+
   function step(now) {
     const t = Math.min((now - start) / duration, 1);
     loadProgress = from + (target - from) * easeInOut(t);
@@ -236,85 +535,100 @@ function setBar(target) {
   requestAnimationFrame(step);
 }
 
-// تحميل جميع الأصول (مع دعم الفيديو)
+/* ─── PRELOAD ────────────────────────────────────────────────────── */
 function preloadAllAssets() {
-  const total = CONFIG.assetsToPreload.length;
+  const assets = [
+    CONFIG.assets.crest,
+    CONFIG.assets.doorStatic,
+    CONFIG.assets.doorGif,
+    CONFIG.assets.detailsBg,
+    CONFIG.assets.doorMusic,
+    CONFIG.assets.weddingMusic,
+  ].filter(Boolean);
+
+  const total = assets.length;
   if (total === 0) return Promise.resolve();
+
   let loaded = 0;
   const BAR_START = 10,
     BAR_END = 90;
+
   function onAssetDone() {
     loaded++;
-    const pct = BAR_START + (loaded / total) * (BAR_END - BAR_START);
-    setBar(pct);
+    setBar(BAR_START + (loaded / total) * (BAR_END - BAR_START));
   }
-  const promises = CONFIG.assetsToPreload.map((src) => {
-    return new Promise((resolve) => {
-      const isVideo = src.match(/\.(mp4|webm|mov)$/i);
-      const isAudio = src.match(/\.(mp3|wav|ogg)$/i);
-      if (isVideo) {
-        const video = document.createElement("video");
-        video.preload = "auto";
-        video.src = src;
-        video.load();
-        const timeout = setTimeout(() => resolve(), 12000);
-        video.addEventListener(
-          "canplaythrough",
-          () => {
+
+  const promises = assets.map(
+    (src) =>
+      new Promise((resolve) => {
+        const isVideo = src.match(/\.(mp4|webm|mov)$/i);
+        const isAudio = src.match(/\.(mp3|wav|ogg)$/i);
+
+        if (isVideo) {
+          const video = document.createElement("video");
+          video.preload = "auto";
+          video.src = src;
+          video.load();
+          const timeout = setTimeout(() => resolve(), 12000);
+          video.addEventListener(
+            "canplaythrough",
+            () => {
+              clearTimeout(timeout);
+              onAssetDone();
+              resolve();
+            },
+            { once: true },
+          );
+          video.addEventListener(
+            "error",
+            () => {
+              clearTimeout(timeout);
+              onAssetDone();
+              resolve();
+            },
+            { once: true },
+          );
+        } else if (isAudio) {
+          const audio = new Audio();
+          audio.preload = "auto";
+          audio.src = src;
+          const timeout = setTimeout(() => resolve(), 12000);
+          audio.addEventListener(
+            "canplaythrough",
+            () => {
+              clearTimeout(timeout);
+              onAssetDone();
+              resolve();
+            },
+            { once: true },
+          );
+          audio.addEventListener(
+            "error",
+            () => {
+              clearTimeout(timeout);
+              onAssetDone();
+              resolve();
+            },
+            { once: true },
+          );
+          audio.load();
+        } else {
+          const img = new Image();
+          const timeout = setTimeout(() => resolve(), 12000);
+          img.onload = img.onerror = () => {
             clearTimeout(timeout);
             onAssetDone();
             resolve();
-          },
-          { once: true },
-        );
-        video.addEventListener(
-          "error",
-          () => {
-            clearTimeout(timeout);
-            onAssetDone();
-            resolve();
-          },
-          { once: true },
-        );
-      } else if (isAudio) {
-        const audio = new Audio();
-        audio.preload = "auto";
-        audio.src = src;
-        const timeout = setTimeout(() => resolve(), 12000);
-        audio.addEventListener(
-          "canplaythrough",
-          () => {
-            clearTimeout(timeout);
-            onAssetDone();
-            resolve();
-          },
-          { once: true },
-        );
-        audio.addEventListener(
-          "error",
-          () => {
-            clearTimeout(timeout);
-            onAssetDone();
-            resolve();
-          },
-          { once: true },
-        );
-        audio.load();
-      } else {
-        const img = new Image();
-        const timeout = setTimeout(() => resolve(), 12000);
-        img.onload = img.onerror = () => {
-          clearTimeout(timeout);
-          onAssetDone();
-          resolve();
-        };
-        img.src = src;
-      }
-    });
-  });
+          };
+          img.src = src;
+        }
+      }),
+  );
+
   return Promise.all(promises);
 }
 
+/* ─── LOADING SCREEN ────────────────────────────────────────────── */
 async function runLoadingScreen() {
   setBar(10);
   spawnParticles();
@@ -327,6 +641,7 @@ async function runLoadingScreen() {
   transitionToPage(pageLoading, pageDoor);
 }
 
+/* ─── PAGE TRANSITION ───────────────────────────────────────────── */
 function transitionToPage(fromPage, toPage, cb) {
   fromPage.classList.add("fade-out");
   setTimeout(() => {
@@ -336,19 +651,15 @@ function transitionToPage(fromPage, toPage, cb) {
   }, 900);
 }
 
-function animateDetailCards() {
-  pageDetails.querySelectorAll(".detail-card").forEach((c, i) => {
-    c.style.animation = "cardEntrance 0.8s ease both";
-    c.style.animationDelay = i * 0.15 + "s";
-  });
-}
-
-// تبديل اللغة
+/* ─── LANGUAGE TOGGLE ───────────────────────────────────────────── */
 function toggleLanguage() {
   currentLang = currentLang === "en" ? "ar" : "en";
-  const html = document.documentElement;
-  html.setAttribute("lang", currentLang);
-  html.setAttribute("dir", currentLang === "ar" ? "rtl" : "ltr");
+  document.documentElement.setAttribute("lang", currentLang);
+  document.documentElement.setAttribute(
+    "dir",
+    currentLang === "ar" ? "rtl" : "ltr",
+  );
+
   const nameEl = document.getElementById("rsvp-name");
   const msgEl = document.getElementById("rsvp-msg");
   if (nameEl)
@@ -358,10 +669,9 @@ function toggleLanguage() {
       currentLang === "ar" ? "أمنياتك الطيبة..." : "Your warm wishes...";
 }
 
-// RSVP
+/* ─── RSVP ───────────────────────────────────────────────────────── */
 function handleRSVP(event) {
   event.preventDefault();
-  event.stopPropagation();
 
   const name = document.getElementById("rsvp-name").value.trim();
   const attendInput = document.querySelector('input[name="attend"]:checked');
@@ -373,7 +683,7 @@ function handleRSVP(event) {
         ? "الرجاء إدخال اسمك الكامل."
         : "Please enter your full name.",
     );
-    return false;
+    return;
   }
   if (!attendInput) {
     alert(
@@ -381,7 +691,7 @@ function handleRSVP(event) {
         ? "الرجاء اختيار حالة الحضور."
         : "Please confirm attendance.",
     );
-    return false;
+    return;
   }
 
   const attendText =
@@ -400,11 +710,8 @@ function handleRSVP(event) {
   rsvpForm.classList.add("hidden");
   rsvpSuccess.classList.remove("hidden");
   bindWhatsAppButtons();
-
-  return false;
 }
 
-// أزرار واتساب
 function bindWhatsAppButtons() {
   const groomBtn = document.getElementById("send-to-groom");
   const brideBtn = document.getElementById("send-to-bride");
@@ -413,98 +720,59 @@ function bindWhatsAppButtons() {
   if (groomBtn) {
     const newGroom = groomBtn.cloneNode(true);
     groomBtn.parentNode.replaceChild(newGroom, groomBtn);
-    newGroom.onclick = (e) => {
-      e.preventDefault();
-      if (!CONFIG.groomWhatsappNumber) {
-        alert(
-          currentLang === "ar"
-            ? "لم يتم تعيين رقم العريس"
-            : "Groom number not set",
+    newGroom.onclick = () => {
+      if (CONFIG.groomWhatsapp) {
+        window.open(
+          `https://wa.me/${CONFIG.groomWhatsapp}?text=${encodeURIComponent(currentWhatsAppMessage)}`,
+          "_blank",
         );
-        return;
+      } else {
+        alert("Groom number not set");
       }
-      const url = `https://wa.me/${CONFIG.groomWhatsappNumber}?text=${encodeURIComponent(currentWhatsAppMessage)}`;
-      window.open(url, "_blank");
     };
   }
 
   if (brideBtn) {
     const newBride = brideBtn.cloneNode(true);
     brideBtn.parentNode.replaceChild(newBride, brideBtn);
-    newBride.onclick = (e) => {
-      e.preventDefault();
-      if (!CONFIG.brideWhatsappNumber) {
-        alert(
-          currentLang === "ar"
-            ? "لم يتم تعيين رقم العروسة"
-            : "Bride number not set",
+    newBride.onclick = () => {
+      if (CONFIG.brideWhatsapp) {
+        window.open(
+          `https://wa.me/${CONFIG.brideWhatsapp}?text=${encodeURIComponent(currentWhatsAppMessage)}`,
+          "_blank",
         );
-        return;
+      } else {
+        alert("Bride number not set");
       }
-      const url = `https://wa.me/${CONFIG.brideWhatsappNumber}?text=${encodeURIComponent(currentWhatsAppMessage)}`;
-      window.open(url, "_blank");
     };
   }
 
   if (copyBtn) {
     const newCopy = copyBtn.cloneNode(true);
     copyBtn.parentNode.replaceChild(newCopy, copyBtn);
-    newCopy.onclick = (e) => {
-      e.preventDefault();
+    newCopy.onclick = () => {
       navigator.clipboard
         .writeText(currentWhatsAppMessage)
-        .then(() => {
-          alert(currentLang === "ar" ? "تم نسخ الرسالة!" : "Message copied!");
-        })
-        .catch(() => {
-          alert(
-            currentLang === "ar"
-              ? "فشل النسخ، يمكنك نسخها يدوياً."
-              : "Copy failed, please copy manually.",
-          );
-        });
+        .then(() => alert("Message copied!"))
+        .catch(() => alert("Copy failed"));
     };
   }
 }
 
-// تفعيل الصوت عند أول تفاعل (تجاوز سياسة المتصفح)
-function enableAudioOnUserInteraction() {
-  let activated = false;
-  const enable = () => {
-    if (activated) return;
-    activated = true;
-    if (bgMusic && bgMusic.paused && CONFIG.musicUrl) {
-      bgMusic
-        .play()
-        .then(() => {
-          bgMusic.pause();
-          bgMusic.currentTime = 0;
-        })
-        .catch(() => {});
-    }
-    document.removeEventListener("click", enable);
-    document.removeEventListener("touchstart", enable);
-  };
-  document.addEventListener("click", enable);
-  document.addEventListener("touchstart", enable);
-}
-
-// ربط الأحداث
-knockBtn.addEventListener("click", playDoor);
-langBtnDoor.addEventListener("click", toggleLanguage);
-langBtnDet.addEventListener("click", toggleLanguage);
-if (rsvpForm) {
-  rsvpForm.addEventListener("submit", handleRSVP);
-  rsvpForm.addEventListener("submit", (e) => e.preventDefault());
-}
-enableAudioOnUserInteraction();
-
-// بدء التشغيل
+/* ─── INIT ───────────────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", async () => {
   initAudio();
+  initMusicControl();
   injectContent();
-  bindWhatsAppButtons();
+
   pageLoading.classList.add("active");
   doorGif.removeAttribute("src");
+
+  // Event Listeners
+  knockBtn.addEventListener("click", playDoor);
+  langBtnDoor.addEventListener("click", toggleLanguage);
+  langBtnDet.addEventListener("click", toggleLanguage);
+  if (rsvpForm) rsvpForm.addEventListener("submit", handleRSVP);
+
   await runLoadingScreen();
 });
